@@ -33,14 +33,16 @@ time.sleep(7)
 
 job_lists = []
 
-for page in range(2,6):
-    job_cards = browser.find_elements(By.XPATH, '//ul[@class="jobs-search-results__list list-style-none"]/li')
-    card_ids = [result.get_attribute('id') for result in job_cards]
+for page in range(2,4): # range(2, can be change depending on mood) :)
+    job_cards = browser.find_elements(By.XPATH, '//ul[@class="scaffold-layout__list-container"]/li') #Class got changed??
+    card_ids = [result.get_attribute('id') for result in job_cards] #Get all job ids to let selenium click each job individually
+    #print(card_ids)
     for id in card_ids:
+        time.sleep(1)
         try:
             job = browser.find_element(By.ID, id)
             job_id = job.get_attribute('data-occludable-job-id')
-            browser.find_element(By.XPATH, f'//div[@data-job-id={job_id}]').click()
+            browser.find_element(By.XPATH, f'//div[@data-job-id={job_id}]').click() #Click on each job for the html to show the card
         except:
             continue
 
@@ -48,7 +50,7 @@ for page in range(2,6):
             job_title = browser.find_element(By.XPATH, "//h2[@class='t-24 t-bold jobs-unified-top-card__job-title']").text
         except:
             job_title = ''
-
+            #time.sleep(5)
         #print(job_title)
 
         try:
@@ -63,9 +65,9 @@ for page in range(2,6):
             job_company = ''
             job_location = ''
             job_worktype = ''
+            #time.sleep(5)
+            #print(job_company + " " + job_location + " " + job_worktype)
 
-        #print(job_company + " " + job_location + " " + job_worktype)
-        #print()
         try:
             sub_card_2 = browser.find_element(By.XPATH, "//span[@class='jobs-unified-top-card__subtitle-secondary-grouping t-black--light']").find_elements(By.TAG_NAME, 'span')
             job_post_date_from_sd = sub_card_2[0].text
@@ -73,8 +75,54 @@ for page in range(2,6):
         except:
             job_post_date_from_sd = ''
             job_no_of_apps = ''
-        #print(job_post_date_from_sd + " " + job_no_of_apps)
-        job_list = [job_title, job_company, job_location, job_worktype, job_post_date_from_sd, job_no_of_apps]
+            #time.sleep(5)
+            #print(job_post_date_from_sd + " " + job_no_of_apps)
+
+        try:
+            sub_card_3 = browser.find_elements(By.XPATH, '//div[@class="mt5 mb2"]/ul//li')
+            if sub_card_3[0].text != '':
+                job_info = sub_card_3[0].text.split(" · ")
+                if (len(job_info) == 1):
+                    job_salary = ''
+                    job_work_dur = job_info[0]
+                    job_pos_title = ''
+                elif (len(job_info) == 2):
+                    job_salary = ''
+                    job_work_dur = job_info[0]
+                    job_pos_title = job_info[1]
+                else:
+                    job_salary = job_info[0]
+                    job_work_dur = job_info[1]
+                    job_pos_title = job_info[2]
+            else:
+                job_salary = ''
+                job_work_dur = ''
+                job_pos_title = ''
+
+            if sub_card_3[1].text != '':
+                job_info = sub_card_3[1].text.split(" · ")
+                if len(job_info) == 2:
+                    company_size = job_info[0]
+                    company_sector = job_info[1]
+                elif len(job_info) == 1:
+                    company_size = job_info[0]
+                    company_sector = ''
+                else:
+                    company_size = ''
+                    company_sector = ''
+            else:
+                company_size = ''
+                company_sector = ''
+        except:
+            job_salary = ''
+            job_work_dur = ''
+            job_pos_title = ''
+            company_size = ''
+            company_sector = ''
+            time.sleep(5)
+
+        job_detail = browser.find_element(By.XPATH, '//div[@id="job-details"]').text
+        job_list = [job_title, job_company, job_location, job_worktype, job_work_dur, job_pos_title, job_salary, company_size, company_sector, job_post_date_from_sd, job_no_of_apps, job_detail]
         job_lists.append(job_list)
 
     browser.find_element(By.XPATH, f'//button[@aria-label="Page {page}"]').click()
